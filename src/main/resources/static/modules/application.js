@@ -1,6 +1,6 @@
 export class Application {
 
   init() {
-    console.log("Hello world from app!");
+    console.log("Photo loader has been started!");
   }
 }
