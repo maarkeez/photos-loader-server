@@ -65,8 +65,15 @@
       Photo Viewer
     </div>
 
-    <div class="col-sm-3" ng-repeat="photo in photoViewerController.photos">
-      {{photo}}
+    <div class="row">
+      <div ng-repeat="photo in photoViewerController.photos" class="col-sm-4">
+        <div class="card">
+          <img ng-src="/api/photos/{{photo}}" class="card-img-top"/>
+          <div class="card-body">
+            <p class="card-text">{{photo}}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

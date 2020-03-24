@@ -4,7 +4,7 @@ export function PhotoViewerController($http) {
   self.photos = []
 
   $http.get('/api/photos').then(function(response) {
-   self.photos = response.data;
+    self.photos = response.data;
   });
 
 };
