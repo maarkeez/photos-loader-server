@@ -6,12 +6,14 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.ResponseEntity.ok;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequestMapping( "/api" )
 @RequiredArgsConstructor( onConstructor = @__( @Autowired ) )
@@ -59,9 +62,11 @@ public class PhotosController {
   @GetMapping( value = "/photos/{photoName}" )
   @SneakyThrows
   public ResponseEntity<Resource> findPhotoByName ( @PathVariable String photoName ) {
+    
     val photoPath = loadPhotoPath(photoName);
     val photoResource = toResource(photoPath);
-    val contentType = tika.detect(photoPath);
+    val contentType = parseContentType(photoPath);
+    
     return ok().header(CONTENT_TYPE, contentType)
                .header(CONTENT_DISPOSITION, "filename=\"" + photoPath.getFileName() + "\"")
                .body(photoResource);
@@ -93,5 +98,9 @@ public class PhotosController {
   private Path loadPhotoPath ( String photoName ) {
     val rootPath = photosProperties.getPhotosPath();
     return rootPath.resolve(photoName);
+  }
+  
+  private String parseContentType ( Path photoPath ) throws IOException {
+    return tika.detect(photoPath);
   }
 }
