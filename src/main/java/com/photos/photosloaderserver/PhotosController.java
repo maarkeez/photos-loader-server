@@ -1,16 +1,23 @@
 package com.photos.photosloaderserver;
 
+import static java.nio.file.Files.readAttributes;
 import static java.nio.file.Files.walk;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.ResponseEntity.ok;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -38,18 +45,46 @@ public class PhotosController {
   
   private final PhotosProperties photosProperties;
   private final Tika tika = new Tika();
+  private final List<String> filesOrderedByCreationDate = new ArrayList<>();
+  
+  @PostConstruct
+  @SneakyThrows
+  public void init () {
+    
+    val rootPath = photosProperties.getPhotosPath();
+    log.info("Loading items from: {}", rootPath);
+    try (Stream<Path> paths = walk(rootPath, 10)) {
+      filesOrderedByCreationDate.addAll(paths.filter(Files::isRegularFile)
+                                             .map(this::toFileWrapper)
+                                             .sorted(comparing(FileWrapper::getCreationDate))
+                                             .map(FileWrapper::getPath)
+                                             .map(rootPath::relativize)
+                                             .map(Path::toString)
+                                             .collect(toList()));
+    }
+    log.info("Items loaded: {}", filesOrderedByCreationDate.size());
+  }
+  
+  @SneakyThrows
+  private FileWrapper toFileWrapper ( Path path ) {
+    return FileWrapper.builder()
+                      .path(path)
+                      .creationDate(collectFileCreationDate(path))
+                      .build();
+  }
+  
+  private long collectFileCreationDate ( Path path ) throws IOException {
+    return readAttributes(path, BasicFileAttributes.class)
+                .creationTime()
+                .toInstant()
+                .toEpochMilli();
+  }
   
   @GetMapping( "/photos" )
   @SneakyThrows
   public List<String> findAll () {
-    val rootPath = photosProperties.getPhotosPath();
     
-    try (Stream<Path> paths = walk(rootPath, 10)) {
-      return paths.filter(Files::isRegularFile)
-                  .map(rootPath::relativize)
-                  .map(Path::toString)
-                  .collect(toList());
-    }
+    return filesOrderedByCreationDate;
   }
   
   @GetMapping( "/photos/{photoName}/download" )
@@ -63,8 +98,9 @@ public class PhotosController {
   @GetMapping( value = "/photos/name/**" )
   @SneakyThrows
   public ResponseEntity<Resource> findPhotoByName ( HttpServletRequest request ) {
-  
-    val requestURL = request.getRequestURL().toString();
+    
+    val requestURL = request.getRequestURL()
+                            .toString();
     val photoName = requestURL.split("/photos/name/")[1];
     
     val photoPath = loadPhotoPath(photoName);
