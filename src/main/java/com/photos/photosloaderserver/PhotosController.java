@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +44,9 @@ public class PhotosController {
   public List<String> findAll () {
     val rootPath = photosProperties.getPhotosPath();
     
-    try (Stream<Path> paths = walk(rootPath, 1)) {
+    try (Stream<Path> paths = walk(rootPath, 10)) {
       return paths.filter(Files::isRegularFile)
-                  .map(Path::getFileName)
+                  .map(rootPath::relativize)
                   .map(Path::toString)
                   .collect(toList());
     }
@@ -59,9 +60,12 @@ public class PhotosController {
                .body(file);
   }
   
-  @GetMapping( value = "/photos/{photoName}" )
+  @GetMapping( value = "/photos/name/**" )
   @SneakyThrows
-  public ResponseEntity<Resource> findPhotoByName ( @PathVariable String photoName ) {
+  public ResponseEntity<Resource> findPhotoByName ( HttpServletRequest request ) {
+  
+    val requestURL = request.getRequestURL().toString();
+    val photoName = requestURL.split("/photos/name/")[1];
     
     val photoPath = loadPhotoPath(photoName);
     val photoResource = toResource(photoPath);
