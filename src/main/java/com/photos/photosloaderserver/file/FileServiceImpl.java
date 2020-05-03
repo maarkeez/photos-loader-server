@@ -81,7 +81,7 @@ public class FileServiceImpl implements FileService {
   
   @Override
   public Path photoPath ( String relativePath ) {
-    return photosProperties.getThumbnailsPath()
+    return photosProperties.getPhotosPath()
                            .resolve(relativePath);
   }
   
