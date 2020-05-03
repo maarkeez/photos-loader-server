@@ -1,12 +1,13 @@
-package com.photos.photosloaderserver;
+package com.photos.photosloaderserver.file;
 
 import java.nio.file.Path;
 import lombok.Value;
 import lombok.experimental.SuperBuilder;
 
 @Value
-@SuperBuilder(toBuilder = true)
+@SuperBuilder( toBuilder = true )
 public class FileWrapper {
+  
   Path path;
   long creationDate;
 }

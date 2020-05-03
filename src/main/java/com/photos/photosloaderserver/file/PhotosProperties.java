@@ -1,4 +1,4 @@
-package com.photos.photosloaderserver;
+package com.photos.photosloaderserver.file;
 
 import java.nio.file.Path;
 import lombok.Getter;
