@@ -49,6 +49,27 @@
 			</exclusions>
 		</dependency>
 
+		<!-- Playground -->
+<!--		<dependency>-->
+<!--			<groupId>org.openimaj</groupId>-->
+<!--			<artifactId>core-image</artifactId>-->
+<!--			<version>1.3.5</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>net.imagej</groupId>-->
+<!--			<artifactId>ij</artifactId>-->
+<!--			<version>1.51h</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>jmagick</groupId>-->
+<!--			<artifactId>jmagick</artifactId>-->
+<!--			<version>6.6.9</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 
 	</dependencies>
 

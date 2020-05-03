@@ -8,13 +8,11 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.ResponseEntity.ok;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
@@ -102,8 +100,24 @@ public class PhotosController {
     val requestURL = request.getRequestURL()
                             .toString();
     val photoName = requestURL.split("/photos/name/")[1];
-    
     val photoPath = loadPhotoPath(photoName);
+    
+    return pathToResourceResponse(photoPath);
+  }
+  
+  @GetMapping( value = "/thumbnail/name/**" )
+  @SneakyThrows
+  public ResponseEntity<Resource> findPhotoThumbnailByName ( HttpServletRequest request ) {
+    
+    val requestURL = request.getRequestURL()
+                            .toString();
+    val photoName = requestURL.split("/thumbnail/name/")[1];
+    val photoPath = photosProperties.getThumbnailsPath().resolve(photoName);
+    
+    return pathToResourceResponse(photoPath);
+  }
+  
+  private ResponseEntity<Resource> pathToResourceResponse ( Path photoPath ) throws IOException {
     val photoResource = toResource(photoPath);
     val contentType = parseContentType(photoPath);
     

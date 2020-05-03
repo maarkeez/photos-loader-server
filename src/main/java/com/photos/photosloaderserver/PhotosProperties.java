@@ -12,4 +12,7 @@ public class PhotosProperties {
   @Value( "#{ T(java.nio.file.Paths).get('${photos.path}')}" )
   private Path photosPath;
   
+  @Getter
+  @Value( "#{ T(java.nio.file.Paths).get('${thumbnails.path}')}" )
+  private Path thumbnailsPath;
 }
